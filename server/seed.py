@@ -1,34 +1,21 @@
-#!/usr/bin/env python3
+from app import app, db, Message
 
-from random import choice as rc
+def seed():
+    messages = [
+        {'body': 'Hello, world!', 'username': 'Ian'},
+        {'body': 'This is a seeded message.', 'username': 'SeedBot'},
+        {'body': 'I love Chatterbox!', 'username': 'ChatterFan'},
+    ]
 
-from faker import Faker
+    for m in messages:
+        msg = Message(body=m['body'], username=m['username'])
+        db.session.add(msg)
 
-from app import app
-from models import db, Message
+    db.session.commit()
+    print('Database seeded with messages!')
 
-fake = Faker()
-
-usernames = [fake.first_name() for i in range(4)]
-if "Duane" not in usernames:
-    usernames.append("Duane")
-
-def make_messages():
-
-    Message.query.delete()
-    
-    messages = []
-
-    for i in range(20):
-        message = Message(
-            body=fake.sentence(),
-            username=rc(usernames),
-        )
-        messages.append(message)
-
-    db.session.add_all(messages)
-    db.session.commit()        
 
 if __name__ == '__main__':
+    # make sure we are inside Flask application context
     with app.app_context():
-        make_messages()
+        seed()
